@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Rendez-vous — DentaConsult{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Rendez-vous</h1>
+</div>
+
+<div class="grid two">
+  <section class="card">
+    <h2>Planifier un rendez-vous</h2>
+    <form method="post" class="form">
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      <label>Patient *
+        <select name="patient_id" required>
+          <option value="">— choisir —</option>
+          {% for p in patients %}
+            <option value="{{ p.id }}">{{ p.nom|upper }} {{ p.prenom }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Date et heure *<input type="datetime-local" name="rdv_date" required></label>
+      <label>Durée (minutes)
+        <select name="duree">
+          <option>15</option><option selected>30</option>
+          <option>45</option><option>60</option><option>90</option>
+        </select>
+      </label>
+      <label>Motif<input name="motif" placeholder="Contrôle, détartrage, urgence…"></label>
+      <label>Notes<textarea name="notes" rows="2"></textarea></label>
+      <button class="btn primary" type="submit">Enregistrer le rendez-vous</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>Agenda</h2>
+    {% if liste %}
+    <table>
+      <thead><tr><th>Date</th><th>Patient</th><th>Motif</th><th>Statut</th><th></th></tr></thead>
+      <tbody>
+      {% for r in liste %}
+        <tr>
+          <td>{{ r.rdv_date|replace('T', ' à ') }}</td>
+          <td><a href="{{ url_for('patient_detail', pid=r.patient_id) }}">{{ r.nom|upper }} {{ r.prenom }}</a></td>
+          <td class="small">{{ r.motif or '—' }}</td>
+          <td><span class="badge {{ r.statut }}">{{ r.statut }}</span></td>
+          <td class="right">
+            {% if r.statut == 'planifie' %}
+            <form method="post" class="inline"
+                  action="{{ url_for('appointment_status', rid=r.id, statut='honore') }}">
+              <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+              <button class="btn small" type="submit">✓</button>
+            </form>
+            <form method="post" class="inline"
+                  action="{{ url_for('appointment_status', rid=r.id, statut='annule') }}">
+              <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+              <button class="btn small danger" type="submit">✕</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <p class="muted">Aucun rendez-vous.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

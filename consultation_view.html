@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Consultation du {{ c.date_consult }} — DentaConsult{% endblock %}
+{% block content %}
+<div class="page-head no-print">
+  <div>
+    <h1>Compte rendu de consultation</h1>
+    <p class="muted">{{ patient.prenom }} {{ patient.nom|upper }} — {{ c.date_consult }}</p>
+  </div>
+  <div class="actions">
+    <a class="btn" href="{{ url_for('patient_detail', pid=patient.id) }}">Retour au patient</a>
+    <button class="btn primary" type="button" data-print>Imprimer / PDF</button>
+  </div>
+</div>
+
+<article class="card report">
+  <header class="report-head">
+    <div>
+      <h2>Compte rendu de consultation bucco-dentaire</h2>
+      <p class="muted">DentaConsult — document de démonstration</p>
+    </div>
+    <dl class="kv compact">
+      <dt>Patient</dt><dd>{{ patient.prenom }} {{ patient.nom|upper }}</dd>
+      <dt>Naissance</dt><dd>{{ patient.date_naissance or '—' }}</dd>
+      <dt>Date</dt><dd>{{ c.date_consult }}</dd>
+      <dt>Praticien</dt><dd>{{ c.praticien or '—' }}</dd>
+    </dl>
+  </header>
+
+  {% if patient.allergies %}
+    <p class="alert">Allergies : {{ patient.allergies }}</p>
+  {% endif %}
+
+  <h3>Motif</h3><p>{{ c.motif or '—' }}</p>
+  <h3>Anamnèse</h3><p class="pre">{{ c.anamnese or '—' }}</p>
+  <h3>Examen clinique</h3><p class="pre">{{ c.examen or '—' }}</p>
+
+  <h3>Schéma dentaire</h3>
+  {% if odo %}
+    <div class="odontogram readonly">
+      {% for arcade, dents in teeth %}
+        <div class="arcade">
+          <span class="arcade-label">{{ arcade }}</span>
+          <div class="teeth">
+            {% for d in dents %}
+              {% set st = odo.get(d, 'sain') %}
+              <span class="tooth s-{{ st }}" title="{{ state_labels.get(st, st) }}">{{ d }}</span>
+            {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    <ul class="legend-list">
+      {% for d, st in odo.items() if st != 'sain' %}
+        <li>Dent {{ d }} : {{ state_labels.get(st, st) }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="muted">Aucune annotation.</p>
+  {% endif %}
+
+  <h3>Diagnostic</h3><p class="pre">{{ c.diagnostic or '—' }}</p>
+  <h3>Plan de traitement</h3><p class="pre">{{ c.plan or '—' }}</p>
+  <h3>Ordonnance</h3><p class="pre">{{ c.ordonnance or '—' }}</p>
+
+  {% if c.notes %}
+    <h3 class="no-print">Notes internes</h3>
+    <p class="pre muted no-print">{{ c.notes }}</p>
+  {% endif %}
+
+  <footer class="report-foot">
+    Document remis au patient — conservation et accès conformes au RGPD.
+  </footer>
+</article>
+
+<script src="{{ url_for('static', filename='ui.js') }}"></script>
+{% endblock %}

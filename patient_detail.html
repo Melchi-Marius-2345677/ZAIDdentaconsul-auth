@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}{{ patient.prenom }} {{ patient.nom }} — DentaConsult{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>{{ patient.prenom }} {{ patient.nom|upper }}</h1>
+    <p class="muted">
+      Né(e) le {{ patient.date_naissance or '—' }} ·
+      {{ patient.telephone or '—' }} · {{ patient.email or '—' }}
+    </p>
+  </div>
+  <div class="actions">
+    <a class="btn" href="{{ url_for('patient_edit', pid=patient.id) }}">Modifier la fiche</a>
+    <a class="btn primary" href="{{ url_for('consultation_new', pid=patient.id) }}">+ Nouvelle consultation</a>
+  </div>
+</div>
+
+{% if patient.allergies %}
+  <div class="alert">⚠️ Allergies : {{ patient.allergies }}</div>
+{% endif %}
+
+<div class="grid two">
+  <section class="card">
+    <h2>Informations administratives</h2>
+    <dl class="kv">
+      <dt>Adresse</dt><dd>{{ patient.adresse or '—' }}</dd>
+      <dt>N° sécurité sociale</dt><dd>{{ patient.num_secu or '—' }}</dd>
+      <dt>Mutuelle</dt><dd>{{ patient.mutuelle or '—' }}</dd>
+      <dt>Médecin traitant</dt><dd>{{ patient.medecin or '—' }}</dd>
+      <dt>Antécédents</dt><dd>{{ patient.antecedents or '—' }}</dd>
+    </dl>
+  </section>
+
+  <section class="card">
+    <h2>Rendez-vous à venir</h2>
+    {% if rdvs %}
+      <ul class="list">
+        {% for r in rdvs %}
+          <li>
+            <b>{{ r.rdv_date|replace('T', ' à ') }}</b>
+            <span class="muted">{{ r.duree }} min — {{ r.motif }}</span>
+            <form method="post" class="inline"
+                  action="{{ url_for('appointment_status', rid=r.id, statut='honore') }}">
+              <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+              <button class="btn small" type="submit">Honoré</button>
+            </form>
+            <form method="post" class="inline"
+                  action="{{ url_for('appointment_status', rid=r.id, statut='annule') }}">
+              <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+              <button class="btn small danger" type="submit">Annulé</button>
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted">Aucun rendez-vous planifié.</p>
+    {% endif %}
+  </section>
+</div>
+
+<section class="card">
+  <h2>Historique des consultations</h2>
+  {% if consultations %}
+  <table>
+    <thead><tr><th>Date</th><th>Motif</th><th>Diagnostic</th><th>Praticien</th><th></th></tr></thead>
+    <tbody>
+      {% for c in consultations %}
+      <tr>
+        <td>{{ c.date_consult }}</td>
+        <td>{{ c.motif or '—' }}</td>
+        <td class="small">{{ c.diagnostic or '—' }}</td>
+        <td>{{ c.praticien or '—' }}</td>
+        <td class="right"><a class="btn small" href="{{ url_for('consultation_view', cid=c.id) }}">Consulter</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p class="muted">Aucune consultation enregistrée pour ce patient.</p>
+  {% endif %}
+</section>
+{% endblock %}

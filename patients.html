@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Patients — DentaConsult{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Patients</h1>
+  <a class="btn primary" href="{{ url_for('patient_new') }}">+ Nouveau patient</a>
+</div>
+
+<form class="searchbar card" method="get">
+  <input type="search" name="q" value="{{ q }}" placeholder="Rechercher un nom, un prénom, un téléphone…">
+  <button class="btn" type="submit">Rechercher</button>
+</form>
+
+<div class="card">
+  {% if patients %}
+  <table>
+    <thead><tr><th>Nom</th><th>Prénom</th><th>Naissance</th><th>Téléphone</th><th>Allergies</th><th></th></tr></thead>
+    <tbody>
+    {% for p in patients %}
+      <tr>
+        <td><b>{{ p.nom|upper }}</b></td>
+        <td>{{ p.prenom }}</td>
+        <td>{{ p.date_naissance }}</td>
+        <td>{{ p.telephone }}</td>
+        <td class="small">{{ p.allergies or '—' }}</td>
+        <td class="right"><a class="btn small" href="{{ url_for('patient_detail', pid=p.id) }}">Ouvrir</a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p class="muted">Aucun patient trouvé.</p>
+  {% endif %}
+</div>
+{% endblock %}

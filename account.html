@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Mon compte — DentaConsult{% endblock %}
+{% block content %}
+<h1>Mon compte</h1>
+
+<div class="grid two">
+  <section class="card">
+    <h2>Informations</h2>
+    <dl class="kv">
+      <dt>Identifiant</dt><dd>{{ user.username }}</dd>
+      <dt>Nom complet</dt><dd>{{ user.nom_complet }}</dd>
+      <dt>Rôle</dt><dd><span class="badge role">{{ user.role }}</span></dd>
+      <dt>Dernière connexion</dt><dd>{{ user.last_login or '—' }}</dd>
+      <dt>Compte créé le</dt><dd>{{ user.created_at }}</dd>
+    </dl>
+    <p class="hint">
+      Changer votre mot de passe vous déconnecte de toutes vos sessions : vous
+      devrez vous reconnecter.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2>Changer de mot de passe</h2>
+    <form method="post" class="form">
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      <label>Mot de passe actuel
+        <input type="password" name="current" required autocomplete="current-password">
+      </label>
+      <label>Nouveau mot de passe
+        <input type="password" name="password" required autocomplete="new-password"
+               minlength="{{ pwd_min }}">
+      </label>
+      <label>Confirmation
+        <input type="password" name="password2" required autocomplete="new-password">
+      </label>
+      <p class="hint">{{ pwd_min }} caractères minimum, trois types de caractères.</p>
+      <button class="btn primary" type="submit">Modifier le mot de passe</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

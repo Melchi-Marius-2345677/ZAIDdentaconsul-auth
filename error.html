@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Erreur {{ code }} — DentaConsult{% endblock %}
+{% block content %}
+<div class="card">
+  <h1>Erreur {{ code }}</h1>
+  <p>{{ message }}</p>
+  <p><a class="btn" href="{{ url_for('dashboard') }}">Retour au tableau de bord</a></p>
+</div>
+{% endblock %}

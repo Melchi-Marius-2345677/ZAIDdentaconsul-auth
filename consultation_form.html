@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Consultation — {{ patient.prenom }} {{ patient.nom }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Nouvelle consultation</h1>
+    <p class="muted">{{ patient.prenom }} {{ patient.nom|upper }} — né(e) le {{ patient.date_naissance or '—' }}</p>
+  </div>
+</div>
+
+{% if patient.allergies %}
+  <div class="alert">⚠️ Allergies : {{ patient.allergies }} · Antécédents : {{ patient.antecedents or '—' }}</div>
+{% endif %}
+
+<form method="post" class="card form" id="consult-form">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+
+  <div class="grid three">
+    <label>Date de la consultation<input type="date" name="date_consult" value="{{ today }}" required></label>
+    <label>Praticien<input name="praticien" placeholder="Dr …"></label>
+    <label>Motif de consultation *<input name="motif" required placeholder="Douleur, contrôle, détartrage…"></label>
+  </div>
+
+  <h2>1. Anamnèse</h2>
+  <label>Interrogatoire
+    <textarea name="anamnese" rows="3" placeholder="Depuis quand, douleur spontanée ou provoquée, terrain, traitements en cours…"></textarea>
+  </label>
+
+  <h2>2. Examen clinique</h2>
+  <label>Inspection / palpation / tests
+    <textarea name="examen" rows="3" placeholder="État gingival, hygiène, mobilité, percussion, test au froid, radiographie…"></textarea>
+  </label>
+
+  <h2>3. Schéma dentaire (odontogramme FDI)</h2>
+  <p class="hint">Cliquez sur une dent pour faire défiler son état. Les données sont enregistrées avec la consultation.</p>
+  <div class="legend">
+    {% for value, label in states %}
+      <span class="dot s-{{ value }}"></span><span class="legend-label">{{ label }}</span>
+    {% endfor %}
+  </div>
+
+  <div class="odontogram" id="odontogram" data-states='{{ states | tojson }}'>
+    {% for arcade, dents in teeth %}
+      <div class="arcade">
+        <span class="arcade-label">{{ arcade }}</span>
+        <div class="teeth">
+          {% for d in dents %}
+            <button type="button" class="tooth s-sain" data-tooth="{{ d }}" title="Dent {{ d }}">{{ d }}</button>
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+  <input type="hidden" name="odontogramme" id="odo-input" value="{}">
+
+  <h2>4. Diagnostic</h2>
+  <label>Diagnostic retenu
+    <textarea name="diagnostic" rows="2" placeholder="Ex. : pulpitte irréversible sur 46, carie occlusale profonde…"></textarea>
+  </label>
+
+  <h2>5. Plan de traitement</h2>
+  <label>Actes prévus et informations au patient
+    <textarea name="plan" rows="3" placeholder="1) Dévitalisation 46 — 2) Reconstitution corono-périphérique — 3) Contrôle à 6 mois…"></textarea>
+  </label>
+
+  <h2>6. Ordonnance</h2>
+  <label>Prescriptions
+    <textarea name="ordonnance" rows="3" placeholder="Amoxicilline 1 g, 2×/j pendant 7 jours (si pas d'allergie)…"></textarea>
+  </label>
+
+  <label>Notes internes
+    <textarea name="notes" rows="2" placeholder="Non imprimé sur le compte rendu patient."></textarea>
+  </label>
+
+  <div class="actions">
+    <button class="btn primary" type="submit">Enregistrer la consultation</button>
+    <a class="btn" href="{{ url_for('patient_detail', pid=patient.id) }}">Annuler</a>
+  </div>
+</form>
+
+<script src="{{ url_for('static', filename='odontogram.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Modifier' if patient else 'Nouveau' }} patient — DentaConsult{% endblock %}
+{% block content %}
+<h1>{{ 'Modifier la fiche patient' if patient else 'Nouvelle fiche patient' }}</h1>
+
+<form method="post" class="card form">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <div class="grid two">
+    <label>Nom *<input name="nom" required value="{{ patient.nom if patient else '' }}"></label>
+    <label>Prénom *<input name="prenom" required value="{{ patient.prenom if patient else '' }}"></label>
+    <label>Date de naissance<input type="date" name="date_naissance" value="{{ patient.date_naissance if patient else '' }}"></label>
+    <label>Sexe
+      <select name="sexe">
+        {% set s = patient.sexe if patient else '' %}
+        <option value="F" {{ 'selected' if s == 'F' }}>Féminin</option>
+        <option value="M" {{ 'selected' if s == 'M' }}>Masculin</option>
+        <option value="X" {{ 'selected' if s == 'X' }}>Non précisé</option>
+      </select>
+    </label>
+    <label>Téléphone<input name="telephone" value="{{ patient.telephone if patient else '' }}"></label>
+    <label>E-mail<input type="email" name="email" value="{{ patient.email if patient else '' }}"></label>
+    <label>Adresse<input name="adresse" value="{{ patient.adresse if patient else '' }}"></label>
+    <label>N° de sécurité sociale<input name="num_secu" value="{{ patient.num_secu if patient else '' }}"></label>
+    <label>Mutuelle / AMC<input name="mutuelle" value="{{ patient.mutuelle if patient else '' }}"></label>
+    <label>Médecin traitant<input name="medecin" value="{{ patient.medecin if patient else '' }}"></label>
+  </div>
+
+  <label>Allergies connues
+    <textarea name="allergies" rows="2" placeholder="Pénicilline, latex, anesthésiques…">{{ patient.allergies if patient else '' }}</textarea>
+  </label>
+  <label>Antécédents médicaux
+    <textarea name="antecedents" rows="3" placeholder="Diabète, cardiopathie, anticoagulants, grossesse…">{{ patient.antecedents if patient else '' }}</textarea>
+  </label>
+
+  <div class="actions">
+    <button class="btn primary" type="submit">Enregistrer</button>
+    <a class="btn" href="{{ url_for('patients') }}">Annuler</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Premier démarrage — DentaConsult</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="login-page">
+  <form class="card login-card" method="post">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <h1><span class="logo">🦷</span> Premier démarrage</h1>
+    <p class="muted">
+      Création du compte administrateur. Cette page n'est accessible que tant
+      qu'aucun compte n'existe.
+    </p>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}<div class="flash {{ cat }}">{{ msg }}</div>{% endfor %}
+    {% endwith %}
+    <label>Identifiant
+      <input type="text" name="username" required autocomplete="username"
+             pattern="[A-Za-z0-9_\-]{3,40}" title="3 à 40 caractères : lettres, chiffres, tiret, tiret bas">
+    </label>
+    <label>Nom complet
+      <input type="text" name="nom_complet" required placeholder="Dr Camille Martin">
+    </label>
+    <label>Mot de passe
+      <input type="password" name="password" required autocomplete="new-password"
+             minlength="{{ pwd_min if pwd_min else 12 }}">
+    </label>
+    <label>Confirmation
+      <input type="password" name="password2" required autocomplete="new-password">
+    </label>
+    <p class="hint">Au moins 12 caractères, trois types de caractères différents.</p>
+    <button class="btn primary" type="submit">Créer le compte administrateur</button>
+  </form>
+</body>
+</html>

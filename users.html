@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Utilisateurs — DentaConsult{% endblock %}
+{% block content %}
+<h1>Utilisateurs et journal d'audit</h1>
+
+<section class="card">
+  <h2>Comptes ({{ users|length }})</h2>
+  <table>
+    <thead>
+      <tr><th>Identifiant</th><th>Nom</th><th>Rôle</th><th>État</th>
+          <th>Dernière connexion</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td><b>{{ u.username }}</b></td>
+        <td>{{ u.nom_complet }}</td>
+        <td><span class="badge role">{{ u.role }}</span></td>
+        <td>
+          {% if not u.actif %}<span class="badge annule">désactivé</span>
+          {% elif u.locked_until %}<span class="badge annule">verrouillé</span>
+          {% else %}<span class="badge honore">actif</span>{% endif %}
+        </td>
+        <td class="small">{{ u.last_login or '—' }}</td>
+        <td>
+          <form method="post" class="inline"
+                action="{{ url_for('user_admin_action', uid=u.id, action='deverrouiller') }}">
+            <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+            <button class="btn small" type="submit">Déverrouiller</button>
+          </form>
+          {% if u.id != session.get('user_id') %}
+            <form method="post" class="inline"
+                  action="{{ url_for('user_admin_action', uid=u.id, action=('desactiver' if u.actif else 'activer')) }}">
+              <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+              <button class="btn small {{ 'danger' if u.actif }}" type="submit">
+                {{ 'Désactiver' if u.actif else 'Activer' }}
+              </button>
+            </form>
+          {% endif %}
+          <details class="inline-details">
+            <summary class="btn small">Mot de passe</summary>
+            <form method="post" class="inline-form"
+                  action="{{ url_for('user_admin_action', uid=u.id, action='mot-de-passe') }}">
+              <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+              <input type="password" name="password" placeholder="Nouveau mot de passe"
+                     minlength="{{ pwd_min }}" required>
+              <input type="password" name="password2" placeholder="Confirmation" required>
+              <button class="btn small primary" type="submit">Réinitialiser</button>
+            </form>
+          </details>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="card">
+  <h2>Créer un compte</h2>
+  <form method="post" action="{{ url_for('user_new') }}" class="form">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <div class="grid three">
+      <label>Identifiant<input name="username" required
+             pattern="[A-Za-z0-9_\-]{3,40}"></label>
+      <label>Nom complet<input name="nom_complet" required></label>
+      <label>Rôle
+        <select name="role">
+          <option value="praticien">Praticien</option>
+          <option value="secretariat">Secrétariat</option>
+          <option value="admin">Administrateur</option>
+        </select>
+      </label>
+      <label>Mot de passe<input type="password" name="password" required
+             autocomplete="new-password" minlength="{{ pwd_min }}"></label>
+      <label>Confirmation<input type="password" name="password2" required
+             autocomplete="new-password"></label>
+    </div>
+    <p class="hint">{{ pwd_min }} caractères minimum, trois types de caractères.</p>
+    <button class="btn primary" type="submit">Créer le compte</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>Derniers événements (audit)</h2>
+  <table>
+    <thead><tr><th>Horodatage</th><th>Compte</th><th>Action</th><th>Détail</th><th>IP</th></tr></thead>
+    <tbody>
+      {% for e in journal %}
+      <tr>
+        <td class="small">{{ e.ts }}</td>
+        <td class="small">{{ e.username or '—' }}</td>
+        <td class="small"><b>{{ e.action }}</b></td>
+        <td class="small">{{ e.detail or '—' }}</td>
+        <td class="small">{{ e.ip or '—' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}
